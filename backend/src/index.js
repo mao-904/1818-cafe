@@ -1,4 +1,21 @@
-// Rate limiting middleware
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const { PrismaClient } = require('@prisma/client');
+
+const app = express();
+const prisma = new PrismaClient();
+
+// 🔥 CORS Configuration
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(express.json());
+
+// 🔥 Rate Limiting Middleware (after CORS, before routes)
 const requestCount = {};
 app.use((req, res, next) => {
   const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
@@ -13,28 +30,12 @@ app.use((req, res, next) => {
   
   requestCount[ip].count++;
   
-  if (requestCount[ip].count > 30) { // 30 requests per minute
+  if (requestCount[ip].count > 30) {
     return res.status(429).json({ error: 'Too many requests, please wait' });
   }
   
   next();
 });
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const { PrismaClient } = require('@prisma/client');
-
-const app = express();
-const prisma = new PrismaClient();
-
-// 🔥 CRITICAL: Allow ALL origins for now (we'll lock it down later)
-app.use(cors({
-  origin: "https://1818-cafe.vercel.app",
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-app.use(express.json());
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -58,24 +59,33 @@ app.get('/api/menu', async (req, res) => {
   }
 });
 
-// Reservation endpoint
+// 🔥 Reservation endpoint - FIXED (guests converted to number)
 app.post('/api/reservations', async (req, res) => {
   console.log('📝 Reservation request:', req.body);
   const { name, email, phone, date, guests } = req.body;
   
-  if (!name || !email || !date || !guests) {
+  // 🔑 CRITICAL FIX: Convert guests from string to integer
+  const guestsInt = parseInt(guests, 10);
+  
+  if (!name || !email || !date || !guestsInt) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
   
   try {
     const resv = await prisma.reservation.create({
-      data: { name, email, phone, date: new Date(date), guests }
+      data: { 
+        name, 
+        email, 
+        phone, 
+        date: new Date(date), 
+        guests: guestsInt // 🔑 Use the converted number
+      }
     });
     console.log('✅ Reservation created:', resv.id);
-    res.status(201).json(resv);
+    res.status(201).json({ success: true, id: resv.id });
   } catch (err) {
     console.error('❌ Reservation error:', err.message);
-    res.status(400).json({ error: 'Failed to create reservation', details: err.message });
+    res.status(500).json({ error: 'Failed to create reservation', details: err.message });
   }
 });
 
