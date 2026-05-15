@@ -2,108 +2,83 @@
 const CONFIG = {
   API_URL: window.location.hostname === 'localhost' 
     ? 'http://localhost:3000/api' 
-    : 'https://one818-cafe.onrender.com/api'  // ← Your exact Render URL
+    : 'https://one818-cafe.onrender.com/api'
 };
 
-console.log(' Using API URL:', CONFIG.API_URL);
+console.log('🚀 1818 Cafe App Initialized');
+console.log(' API URL:', CONFIG.API_URL);
 
-// Load menu
+// Load Menu
 async function loadMenu() {
+  const grid = document.getElementById('menu-grid');
+  if (!grid) return;
+
   try {
-    console.log('📡 Fetching menu from:', CONFIG.API_URL + '/menu');
-    const response = await fetch(CONFIG.API_URL + '/menu');
+    console.log('📥 Fetching menu...');
+    const res = await fetch(`${CONFIG.API_URL}/menu`);
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     
-    const items = await response.json();
+    const items = await res.json();
     console.log('✅ Menu loaded:', items.length, 'items');
-    
-    const grid = document.getElementById('menu-grid');
-    if (!grid) {
-      console.error('❌ Menu grid element not found');
-      return;
-    }
-    
-    if (items.length === 0) {
-      grid.innerHTML = '<p>No menu items available.</p>';
-      return;
-    }
     
     grid.innerHTML = items.map(item => `
       <div class="menu-item">
         <h3>${item.name}</h3>
-        <p>${item.description || 'Freshly made'}</p>
+        <p>${item.description || 'Freshly prepared'}</p>
         <span class="price">$${item.price}</span>
       </div>
     `).join('');
-    
-  } catch (error) {
-    console.error('❌ Failed to load menu:', error);
-    const grid = document.getElementById('menu-grid');
-    if (grid) {
-      grid.innerHTML = '<p style="color: red;">Failed to load menu. Is the backend running?</p>';
-    }
+  } catch (err) {
+    console.error(' Menu fetch failed:', err);
+    grid.innerHTML = '<p style="color:red;">Failed to load menu. Check console.</p>';
   }
 }
 
-// Handle reservation form
+// Handle Reservation Form
 const form = document.getElementById('reservation-form');
-if (form) {
+const statusEl = document.getElementById('form-status');
+
+if (form && statusEl) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     console.log('📝 Form submitted');
     
-    const statusEl = document.getElementById('form-status');
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData);
+    statusEl.textContent = 'Submitting...';
+    statusEl.style.color = '#666';
     
-    console.log('📤 Sending reservation:', data);
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    console.log('📤 Payload:', data);
     
     try {
-      const response = await fetch(CONFIG.API_URL + '/reservations', {
+      const res = await fetch(`${CONFIG.API_URL}/reservations`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
       
-      console.log('📥 Response status:', response.status);
+      console.log('📥 Response:', res.status, res.statusText);
       
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to submit reservation');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error: ${res.status}`);
       }
       
-      const result = await response.json();
-      console.log('✅ Reservation created:', result);
+      const result = await res.json();
+      console.log('✅ Success:', result);
       
-      if (statusEl) {
-        statusEl.textContent = '✅ Confirmed! We\'ll see you soon.';
-        statusEl.style.color = 'green';
-      }
-      
+      statusEl.textContent = '✅ Confirmed! We\'ll see you soon.';
+      statusEl.style.color = 'green';
       form.reset();
       
-    } catch (error) {
-      console.error('❌ Reservation failed:', error);
-      if (statusEl) {
-        statusEl.textContent = '❌ Network error. Is backend running?';
-        statusEl.style.color = 'red';
-      }
+    } catch (err) {
+      console.error('❌ Reservation failed:', err);
+      statusEl.textContent = '❌ Network error. Is backend running?';
+      statusEl.style.color = 'red';
     }
   });
 }
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('🚀 App initialized');
-  loadMenu();
-});
-
-// Also load immediately in case DOMContentLoaded already fired
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-  loadMenu();
-}
+// Initialize on load
+document.addEventListener('DOMContentLoaded', loadMenu);
