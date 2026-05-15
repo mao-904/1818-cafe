@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Environment variables (SECURITY)
+backend/.env
+frontend/.env
+
+# Prisma generated files (rebuild on deploy)
+backend/.prisma/client/
+backend/prisma/migrations/**/migration.sql
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

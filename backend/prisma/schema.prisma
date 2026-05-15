@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model MenuItem {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(6,2)
+  category    String
+  imageUrl    String?
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Reservation {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String
+  date      DateTime
+  guests    Int
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+}

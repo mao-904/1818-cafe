@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1818 Cafe</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="hero">
+    <h1>1818 Cafe</h1>
+    <p>Craft coffee & fresh bites, served daily.</p>
+    <a href="#menu" class="btn">View Menu</a>
+  </header>
+
+  <main class="container">
+    <section id="menu">
+      <h2>Our Menu</h2>
+      <div id="menu-grid" class="menu-grid"></div>
+    </section>
+
+    <section id="reservations">
+      <h2>Book a Table</h2>
+      <form id="reservation-form">
+        <input type="text" name="name" placeholder="Your Name" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="tel" name="phone" placeholder="Phone (optional)">
+        <input type="datetime-local" name="date" required>
+        <input type="number" name="guests" placeholder="Guests" min="1" max="10" required>
+        <button type="submit" class="btn">Reserve Now</button>
+        <p id="form-status"></p>
+      </form>
+    </section>
+
+    <section id="info">
+      <h2>Visit Us</h2>
+      <p>📍 123 Main St, City, ST</p>
+      <p>🕒 Mon-Fri: 7am-6pm | Sat-Sun: 8am-7pm</p>
+    </section>
+  </main>
+
+  <footer><p>&copy; <span id="year"></span> 1818 Cafe. All rights reserved.</p></footer>
+  <script src="js/app.js"></script>
+</body>
+</html>
