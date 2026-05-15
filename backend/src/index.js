@@ -1,3 +1,24 @@
+// Rate limiting middleware
+const requestCount = {};
+app.use((req, res, next) => {
+  const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+  const now = Date.now();
+  const windowMs = 60000; // 1 minute
+  
+  if (!requestCount[ip]) requestCount[ip] = { count: 0, startTime: now };
+  
+  if (now - requestCount[ip].startTime > windowMs) {
+    requestCount[ip] = { count: 0, startTime: now };
+  }
+  
+  requestCount[ip].count++;
+  
+  if (requestCount[ip].count > 30) { // 30 requests per minute
+    return res.status(429).json({ error: 'Too many requests, please wait' });
+  }
+  
+  next();
+});
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -7,9 +28,9 @@ const app = express();
 const prisma = new PrismaClient();
 
 // 🔥 CRITICAL: Allow ALL origins for now (we'll lock it down later)
-app.use(cors({ 
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+app.use(cors({
+  origin: "https://1818-cafe.vercel.app",
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
