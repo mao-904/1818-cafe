@@ -1,7 +1,7 @@
 const CONFIG = {
   API_URL: window.location.hostname === 'localhost' 
     ? 'http://localhost:3000/api' 
-    : 'https://one818-cafe.onrender.com/api' // ← REPLACE WITH YOUR RENDER URL
+    : 'https://one818-cafe.onrender.com/api'
 };
 async function loadMenu() {
   const grid = document.getElementById("menu-grid");
