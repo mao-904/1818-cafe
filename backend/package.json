@@ -1,25 +1,22 @@
 {
-  "name": "backend",
+  "name": "1818-cafe-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
     "seed": "node prisma/seed.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "@prisma/client": "^5.22.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0"
   },
   "devDependencies": {
-    "@prisma/client": "^5.22.0",
-    "nodemon": "^3.1.14",
+    "nodemon": "^3.1.4",
     "prisma": "^5.22.0"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }
